@@ -1,6 +1,7 @@
 ﻿using NLog;
 using Sandbox.Definitions;
 using Sandbox.Engine.Multiplayer;
+using Sandbox.Engine.Networking;
 using Sandbox.Game;
 using Sandbox.Game.Entities;
 using Sandbox.Game.GameSystems.BankingAndCurrency;
@@ -15,7 +16,10 @@ using System.Threading.Tasks;
 using Torch;
 using Torch.API;
 using Torch.API.Managers;
+using Torch.API.Session;
 using Torch.Managers.PatchManager;
+using Torch.Session;
+using Torch.Utils;
 using VRage;
 using VRage.Game;
 using VRage.Game.Entity;
@@ -31,6 +35,29 @@ namespace AdminLogger
     public class Main : TorchPluginBase
     {
         private static readonly Logger Log = LogManager.GetLogger("AdminLog");
+
+        private static MethodInfo DenyPlayersProfiling;
+        private PatchManager _pm;
+        private PatchContext _context;
+
+
+        [ReflectedMethod(Name = "ClientIsProfiling")]
+        private static Func<MyDedicatedServerBase, ulong, bool> Profiling;
+
+        [ReflectedMethod(Name = "UserRejected")]
+        private static Action<MyDedicatedServerBase, ulong, JoinResult> _userRejected;
+
+
+        public bool IsProfiling(ulong steamId) => Profiling.Invoke((MyDedicatedServerBase)MyMultiplayer.Static, steamId);
+
+        private void UserRejected(ulong steamId, JoinResult reason)
+        {
+            _userRejected.Invoke((MyDedicatedServerBase)MyMultiplayer.Static, steamId, reason);
+        }
+
+
+        public bool ServerRunning { get; private set; }
+
         public override void Init(ITorchBase torch)
         {
             Log.Warn("Lauching Big Brother Protocal");
@@ -38,8 +65,70 @@ namespace AdminLogger
             PatchManager manager = DependencyProviderExtensions.GetManager<PatchManager>(Torch.Managers);
             ApplyPatch(manager.AcquireContext());
 
+
+            _pm = torch.Managers.GetManager<PatchManager>();
+            _context = _pm.AcquireContext();
+
+            TorchSessionManager TorchSession = Torch.Managers.GetManager<TorchSessionManager>();
+            if (TorchSession != null)
+                TorchSession.SessionStateChanged += SessionChanged;
+
         }
 
+
+        private void SessionChanged(ITorchSession session, TorchSessionState state)
+        {
+            ServerRunning = state == TorchSessionState.Loaded;
+            switch (state)
+            {
+                case TorchSessionState.Loaded:
+
+                    ServerRunning = true;
+                    MyGameService.GameServer.ValidateAuthTicketResponse += GameServer_ValidateAuthTicketResponse;
+                    break;
+
+                case TorchSessionState.Unloading:
+                    ServerRunning = false;
+                    break;
+            }
+
+        }
+
+        private void GameServer_ValidateAuthTicketResponse(ulong arg1, JoinResult arg2, ulong arg3)
+        {
+            Log.Warn("Validating join request!");
+
+            if (arg2 == JoinResult.OK)
+            {
+                try
+                {
+                    if (IsProfiling(arg1))
+                    {
+                            MyIdentity Player = MySession.Static.Players.TryGetPlayerIdentity(new MyPlayer.PlayerId(arg1, 0));
+                            if (Player != null)
+                            {
+                                Log.Warn(Player.DisplayName + " was attempting to use keen profiler/ModSDK!");
+                            }
+                            else
+                            {
+                                Log.Warn(arg1 + " was attempting to use keen profiler/ModSDK!");
+                            }
+
+                            Log.Warn("Player was kicked for using profiler/ModSdk");
+                            UserRejected(arg1, JoinResult.ProfilingNotAllowed);
+                    }
+                    else
+                    {
+                        Log.Warn("Validation Passed!");
+                    }
+
+                }
+                catch (Exception e)
+                {
+                    Log.Warn(e);
+                }
+            }
+        }
 
         private static void ApplyPatch(PatchContext ctx)
         {
@@ -122,13 +211,8 @@ new Type[4] {
 
 
             var AfterGridPaste = typeof(MyCubeGrid).GetMethod("TryPasteGrid_Implementation", BindingFlags.Public | BindingFlags.Static | BindingFlags.Instance, null,
-new Type[6] {
-                typeof(List<MyObjectBuilder_CubeGrid>),
-                typeof(bool),
-                typeof(Vector3),
-                typeof(bool),
-                typeof(bool),
-                typeof(RelativeOffset)
+new Type[1] {
+                typeof(MyPasteGridParameters)
 
 }, null);
             if (AfterGridPaste == null)
@@ -195,26 +279,33 @@ new Type[2] {
             }
             ctx.GetPattern(OnTeleport).Suffixes.Add(Method(nameof(TeleportRequest)));
 
+
+
+
+
+
+
+
             //OnEntityOperationClicked
         }
 
         private static MethodInfo Method(string v)
         {
-            
+
             return typeof(Main).GetMethod(v, BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic);
         }
 
 
         private static void PlacedBlock(MyCubeBlockDefinition definition, MyEntity builder, MyObjectBuilder_CubeBlock ob, bool buildAsAdmin)
         {
-            if(buildAsAdmin == true)
+            if (buildAsAdmin == true)
             {
                 string Builder = builder.DisplayName;
                 string block = ob.SubtypeName;
 
                 Log.Warn(string.Format("{0} placed {1} in creative mode!", Builder, block));
             }
-            
+
         }
 
         private static void AdminModeChanged(AdminSettingsEnum settings, ulong steamId)
@@ -227,13 +318,13 @@ new Type[2] {
             }
             catch
             {
-                
+
             }
 
             MyPlayer Player = MySession.Static.Players.TryGetPlayerBySteamId(steamId);
 
             //Sanity Vibe Checks
-            if(Player == null || Player.DisplayName == null)
+            if (Player == null || Player.DisplayName == null)
             {
                 return;
             }
@@ -374,7 +465,7 @@ new Type[2] {
                     return;
                 }
 
-                
+
                 MyEntity d = MyEntities.CreateFromObjectBuilder(obj, false);
                 string ObjectName = d.DisplayName;
 
@@ -396,7 +487,7 @@ new Type[2] {
             Log.Warn(string.Format("{0} spawned {1} {2} into container", Player.DisplayName, amount, item.SubtypeName));
         }
 
-        private static void AfterSpawnGrid(List<MyObjectBuilder_CubeGrid> entities, bool detectDisconnects, Vector3 objectVelocity, bool multiBlock, bool instantBuild, RelativeOffset offset)
+        private static void AfterSpawnGrid(MyPasteGridParameters parameters)
         {
 
 
@@ -412,7 +503,7 @@ new Type[2] {
 
             StringBuilder b = new StringBuilder();
             b.AppendLine();
-            foreach(MyObjectBuilder_CubeGrid grid in entities)
+            foreach (MyObjectBuilder_CubeGrid grid in parameters.Entities)
             {
                 if (grid == null || grid.DisplayName == null || grid.DisplayName == "")
                     continue;
@@ -428,7 +519,7 @@ new Type[2] {
         private static void GridClose(long entityId)
         {
             ulong PlayerID = MyEventContext.Current.Sender.Value;
-            if(PlayerID == 0)
+            if (PlayerID == 0)
             {
                 return;
             }
@@ -441,7 +532,7 @@ new Type[2] {
             }
 
             MyPlayer Player = MySession.Static.Players.TryGetPlayerBySteamId(PlayerID);
-            
+
             //Sanity Vibe Checks
             if (Player == null || Player.DisplayName == null)
             {
@@ -453,7 +544,7 @@ new Type[2] {
             if (MyEntities.TryGetEntityById(entityId, out MyEntity entity))
             {
                 GridNamne = entity.DisplayName;
-                
+
             }
 
             Log.Warn(string.Format("{0} removed grid {1}", PlayerName, GridNamne));
@@ -518,7 +609,7 @@ new Type[2] {
             }
 
             string PlayerName = Player.DisplayName;
-            IMyFaction fac =  MySession.Static.Factions.TryGetFactionById(factionId);
+            IMyFaction fac = MySession.Static.Factions.TryGetFactionById(factionId);
             MyIdentity ToPlayer = MySession.Static.Players.TryGetIdentity(identityId);
 
             Log.Warn(string.Format("{0} requested reputation change of {1} on player {2} of faction {3}", PlayerName, reputationChange, ToPlayer.DisplayName, fac.Tag));
@@ -553,6 +644,8 @@ new Type[2] {
             Log.Warn(string.Format("{0} teleported to {1}", PlayerName, location.ToString()));
 
         }
+
+
 
 
     }
