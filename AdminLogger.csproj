@@ -32,35 +32,31 @@
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="NLog">
-      <HintPath>..\..\..\Desktop\Servers\torch-server\NLog.dll</HintPath>
+      <HintPath>..\..\..\Desktop\TorchServers\torch-server\NLog.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Sandbox.Common">
+      <HintPath>..\..\..\..\..\Program Files (x86)\Steam\steamapps\common\SpaceEngineers\Bin64\Sandbox.Common.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="Sandbox.Game">
-      <HintPath>..\..\..\Desktop\Servers\torch-server\DedicatedServer64\Sandbox.Game.dll</HintPath>
+      <HintPath>..\..\..\..\..\Program Files (x86)\Steam\steamapps\common\SpaceEngineers\Bin64\Sandbox.Game.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="Sandbox.Game.XmlSerializers">
-      <HintPath>..\..\..\Desktop\Servers\torch-server\DedicatedServer64\Sandbox.Game.XmlSerializers.dll</HintPath>
-      <Private>False</Private>
-    </Reference>
-    <Reference Include="Sandbox.Graphics">
-      <HintPath>..\..\..\Desktop\Servers\torch-server\DedicatedServer64\Sandbox.Graphics.dll</HintPath>
+      <HintPath>..\..\..\..\..\Program Files (x86)\Steam\steamapps\common\SpaceEngineers\Bin64\Sandbox.Game.XmlSerializers.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="SpaceEngineers.Game">
-      <HintPath>..\..\..\Desktop\Servers\torch-server\DedicatedServer64\SpaceEngineers.Game.dll</HintPath>
+      <HintPath>..\..\..\..\..\Program Files (x86)\Steam\steamapps\common\SpaceEngineers\Bin64\SpaceEngineers.Game.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="SpaceEngineers.ObjectBuilders">
-      <HintPath>..\..\..\Desktop\Servers\torch-server\DedicatedServer64\SpaceEngineers.ObjectBuilders.dll</HintPath>
+      <HintPath>..\..\..\..\..\Program Files (x86)\Steam\steamapps\common\SpaceEngineers\Bin64\SpaceEngineers.ObjectBuilders.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="SpaceEngineers.ObjectBuilders.XmlSerializers">
-      <HintPath>..\..\..\Desktop\Servers\torch-server\DedicatedServer64\SpaceEngineers.ObjectBuilders.XmlSerializers.dll</HintPath>
-      <Private>False</Private>
-    </Reference>
-    <Reference Include="Steamworks.NET">
-      <HintPath>..\..\..\Desktop\Servers\torch-server\DedicatedServer64\Steamworks.NET.dll</HintPath>
+      <HintPath>..\..\..\..\..\Program Files (x86)\Steam\steamapps\common\SpaceEngineers\Bin64\SpaceEngineers.ObjectBuilders.XmlSerializers.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="System" />
@@ -72,55 +68,32 @@
     <Reference Include="System.Net.Http" />
     <Reference Include="System.Xml" />
     <Reference Include="Torch">
-      <HintPath>..\..\..\Desktop\Servers\torch-server\Torch.dll</HintPath>
+      <HintPath>..\..\..\Desktop\TorchServers\torch-server\Torch.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="Torch.API">
-      <HintPath>..\..\..\Desktop\Servers\torch-server\Torch.API.dll</HintPath>
+      <HintPath>..\..\..\Desktop\TorchServers\torch-server\Torch.API.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="VRage">
-      <HintPath>..\..\..\Desktop\Servers\torch-server\DedicatedServer64\VRage.dll</HintPath>
+      <HintPath>..\..\..\..\..\Program Files (x86)\Steam\steamapps\common\SpaceEngineers\Bin64\VRage.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="VRage.Game">
-      <HintPath>..\..\..\Desktop\Servers\torch-server\DedicatedServer64\VRage.Game.dll</HintPath>
-      <Private>False</Private>
-    </Reference>
-    <Reference Include="VRage.Game.XmlSerializers">
-      <HintPath>..\..\..\Desktop\Servers\torch-server\DedicatedServer64\VRage.Game.XmlSerializers.dll</HintPath>
-      <Private>False</Private>
-    </Reference>
-    <Reference Include="VRage.Input">
-      <HintPath>..\..\..\Desktop\Servers\torch-server\DedicatedServer64\VRage.Input.dll</HintPath>
+      <HintPath>..\..\..\..\..\Program Files (x86)\Steam\steamapps\common\SpaceEngineers\Bin64\VRage.Game.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="VRage.Library">
-      <HintPath>..\..\..\Desktop\Servers\torch-server\DedicatedServer64\VRage.Library.dll</HintPath>
+      <HintPath>..\..\..\..\..\Program Files (x86)\Steam\steamapps\common\SpaceEngineers\Bin64\VRage.Library.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="VRage.Math">
-      <HintPath>..\..\..\Desktop\Servers\torch-server\DedicatedServer64\VRage.Math.dll</HintPath>
-      <Private>False</Private>
-    </Reference>
-    <Reference Include="VRage.Network">
-      <HintPath>..\..\..\Desktop\Servers\torch-server\DedicatedServer64\VRage.Network.dll</HintPath>
-      <Private>False</Private>
-    </Reference>
-    <Reference Include="VRage.Render">
-      <HintPath>..\..\..\Desktop\Servers\torch-server\DedicatedServer64\VRage.Render.dll</HintPath>
-      <Private>False</Private>
-    </Reference>
-    <Reference Include="VRage.Scripting">
-      <HintPath>..\..\..\Desktop\Servers\torch-server\DedicatedServer64\VRage.Scripting.dll</HintPath>
-      <Private>False</Private>
-    </Reference>
-    <Reference Include="VRage.XmlSerializers">
-      <HintPath>..\..\..\Desktop\Servers\torch-server\DedicatedServer64\VRage.XmlSerializers.dll</HintPath>
+      <HintPath>..\..\..\..\..\Program Files (x86)\Steam\steamapps\common\SpaceEngineers\Bin64\VRage.Math.dll</HintPath>
       <Private>False</Private>
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="ChatCommands.cs" />
     <Compile Include="Main.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>

@@ -41,19 +41,8 @@ namespace AdminLogger
         private PatchContext _context;
 
 
-        [ReflectedMethod(Name = "ClientIsProfiling")]
-        private static Func<MyDedicatedServerBase, ulong, bool> Profiling;
-
-        [ReflectedMethod(Name = "UserRejected")]
-        private static Action<MyDedicatedServerBase, ulong, JoinResult> _userRejected;
 
 
-        public bool IsProfiling(ulong steamId) => Profiling.Invoke((MyDedicatedServerBase)MyMultiplayer.Static, steamId);
-
-        private void UserRejected(ulong steamId, JoinResult reason)
-        {
-            _userRejected.Invoke((MyDedicatedServerBase)MyMultiplayer.Static, steamId, reason);
-        }
 
 
         public bool ServerRunning { get; private set; }
@@ -68,66 +57,6 @@ namespace AdminLogger
 
             _pm = torch.Managers.GetManager<PatchManager>();
             _context = _pm.AcquireContext();
-
-            TorchSessionManager TorchSession = Torch.Managers.GetManager<TorchSessionManager>();
-            if (TorchSession != null)
-                TorchSession.SessionStateChanged += SessionChanged;
-
-        }
-
-
-        private void SessionChanged(ITorchSession session, TorchSessionState state)
-        {
-            ServerRunning = state == TorchSessionState.Loaded;
-            switch (state)
-            {
-                case TorchSessionState.Loaded:
-
-                    ServerRunning = true;
-                    MyGameService.GameServer.ValidateAuthTicketResponse += GameServer_ValidateAuthTicketResponse;
-                    break;
-
-                case TorchSessionState.Unloading:
-                    ServerRunning = false;
-                    break;
-            }
-
-        }
-
-        private void GameServer_ValidateAuthTicketResponse(ulong arg1, JoinResult arg2, ulong arg3)
-        {
-            Log.Warn("Validating join request!");
-
-            if (arg2 == JoinResult.OK)
-            {
-                try
-                {
-                    if (IsProfiling(arg1))
-                    {
-                            MyIdentity Player = MySession.Static.Players.TryGetPlayerIdentity(new MyPlayer.PlayerId(arg1, 0));
-                            if (Player != null)
-                            {
-                                Log.Warn(Player.DisplayName + " was attempting to use keen profiler/ModSDK!");
-                            }
-                            else
-                            {
-                                Log.Warn(arg1 + " was attempting to use keen profiler/ModSDK!");
-                            }
-
-                            Log.Warn("Player was kicked for using profiler/ModSdk");
-                            UserRejected(arg1, JoinResult.ProfilingNotAllowed);
-                    }
-                    else
-                    {
-                        Log.Warn("Validation Passed!");
-                    }
-
-                }
-                catch (Exception e)
-                {
-                    Log.Warn(e);
-                }
-            }
         }
 
         private static void ApplyPatch(PatchContext ctx)
@@ -451,7 +380,7 @@ new Type[2] {
             }
         }
 
-        private static void RequestItemSpawn(MyObjectBuilder_FloatingObject obj)
+        private static bool RequestItemSpawn(MyObjectBuilder_FloatingObject obj)
         {
             ulong player = MyEventContext.Current.Sender.Value;
 
@@ -462,7 +391,7 @@ new Type[2] {
                 //Sanity Vibe Checks
                 if (Player == null || Player.DisplayName == null)
                 {
-                    return;
+                    return false;
                 }
 
 
@@ -472,6 +401,13 @@ new Type[2] {
                 Log.Warn(string.Format("{0} spawned {1} {2}", Player.DisplayName, obj.Item.Amount, ObjectName));
 
             }
+            else
+            {
+                (MyMultiplayer.Static as MyMultiplayerServerBase).ValidationFailed(MyEventContext.Current.Sender.Value);
+                Log.Warn(player + " attempted to spawn in items! Is this player hacking?");
+            }
+
+            return false;
         }
 
         private static void SpawnIntoContainer(long amount, SerializableDefinitionId item, long entityId, long playerId)
