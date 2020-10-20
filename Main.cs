@@ -1,4 +1,6 @@
 ﻿using NLog;
+using NLog.Config;
+using NLog.Targets;
 using Sandbox.Definitions;
 using Sandbox.Engine.Multiplayer;
 using Sandbox.Engine.Networking;
@@ -34,7 +36,7 @@ namespace AdminLogger
 {
     public class Main : TorchPluginBase
     {
-        private static readonly Logger Log = LogManager.GetLogger("AdminLog");
+        private static readonly Logger Log = LogManager.GetLogger("AdminLogger");
 
         private static MethodInfo DenyPlayersProfiling;
         private PatchManager _pm;
@@ -49,6 +51,9 @@ namespace AdminLogger
 
         public override void Init(ITorchBase torch)
         {
+            SetLoggingRules();
+
+
             Log.Warn("Lauching Big Brother Protocal");
 
             PatchManager manager = DependencyProviderExtensions.GetManager<PatchManager>(Torch.Managers);
@@ -57,6 +62,33 @@ namespace AdminLogger
 
             _pm = torch.Managers.GetManager<PatchManager>();
             _context = _pm.AcquireContext();
+        }
+
+
+        private void SetLoggingRules()
+        {
+            var rules = LogManager.Configuration.LoggingRules;
+
+            for (int i = rules.Count - 1; i >= 0; i--)
+            {
+                if (rules[i].LoggerNamePattern != "AdminLogger") 
+                    continue;
+
+                rules.RemoveAt(i);
+            }
+
+
+            var logTarget = new FileTarget
+            {
+                FileName = "Logs/AdminLogs/AdminLog-${shortdate}.log",
+                Layout = "${var:logStamp} ${logger}: ${var:logContent}",
+                
+            };
+
+            var fullRule = new LoggingRule("AdminLogger", LogLevel.Debug, logTarget) { Final = true  };
+
+            LogManager.Configuration.LoggingRules.Insert(0, fullRule);
+            LogManager.Configuration.Reload();
         }
 
         private static void ApplyPatch(PatchContext ctx)
@@ -395,7 +427,7 @@ new Type[2] {
                 }
 
 
-                MyEntity d = MyEntities.CreateFromObjectBuilder(obj, false);
+                MyEntity d = MyEntities.CreateFromObjectBuilderAndAdd(obj, false);
                 string ObjectName = d.DisplayName;
 
                 Log.Warn(string.Format("{0} spawned {1} {2}", Player.DisplayName, obj.Item.Amount, ObjectName));
@@ -488,7 +520,6 @@ new Type[2] {
 
         }
 
-
         private static void BalanceChange(long accountOwner, long balanceChange)
         {
             ulong PlayerID = MyEventContext.Current.Sender.Value;
@@ -520,7 +551,6 @@ new Type[2] {
 
             Log.Warn(string.Format("{0} requested balance change of {1}sc on player {2}", PlayerName, balanceChange, ToPlayer.DisplayName));
         }
-
 
         private static void RepChange(long identityId, long factionId, int reputationChange, bool shouldPropagate)
         {
