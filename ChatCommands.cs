@@ -136,7 +136,7 @@ namespace AdminLogger
 
             MySession.Static.RemoteAdminSettings[Result] = PlayerSettings;
 
-            MySession.Static.EnableCreativeTools(Result, false);
+            //MySession.Static.EnableCreativeTools(Result, false);
             MethodInfo P = typeof(MyGuiScreenAdminMenu).GetMethod("AdminSettingsChangedClient", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Static);
 
             Events.RaiseStaticEvent<AdminSettingsEnum, ulong>(P, PlayerSettings, Result, new EndpointId(Result));
