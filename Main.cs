@@ -56,15 +56,12 @@ namespace AdminLogger
 
             Log.Warn("Lauching Big Brother Protocal");
 
-            PatchManager manager = DependencyProviderExtensions.GetManager<PatchManager>(Torch.Managers);
-            ApplyPatch(manager.AcquireContext());
-
-
+           
             _pm = torch.Managers.GetManager<PatchManager>();
             _context = _pm.AcquireContext();
 
             Patcher.InitilizePatcherContext(_context);
-
+            ApplyPatch(_context);
         }
 
 
@@ -103,9 +100,9 @@ namespace AdminLogger
             Patcher.PrePatch<MySession>("OnCreativeToolsEnabled", BindingFlags.NonPublic | BindingFlags.Static, new Type[1] {typeof(bool)}, nameof(CreativeChanged));
             Patcher.PrePatch<MyFloatingObjects>("RequestSpawnCreative_Implementation", BindingFlags.NonPublic | BindingFlags.Static, new Type[1] { typeof(MyObjectBuilder_FloatingObject) }, nameof(RequestItemSpawn));
             Patcher.SuffixPatch<MyCubeGrid>("TryPasteGrid_Implementation", BindingFlags.Public | BindingFlags.Static, new Type[1] { typeof(MyPasteGridParameters) }, nameof(AfterSpawnGrid));
-            Patcher.PrePatch<MyFloatingObjects>("OnGridClosedRequest", BindingFlags.NonPublic | BindingFlags.Static, new Type[1] { typeof(long) }, nameof(GridClose));
-            Patcher.SuffixPatch<MyGuiScreenAdminMenu>("RequestChange", BindingFlags.Public | BindingFlags.Static, new Type[2] { typeof(long), typeof(long) }, nameof(BalanceChange));
-            Patcher.SuffixPatch<MyGuiScreenAdminMenu>("RequestChangeReputation", BindingFlags.Public | BindingFlags.Static, new Type[4] { typeof(long), typeof(long), typeof(int), typeof(bool) }, nameof(RepChange));
+            Patcher.PrePatch<MyCubeGrid>("OnGridClosedRequest", BindingFlags.NonPublic | BindingFlags.Static, new Type[1] { typeof(long) }, nameof(GridClose));
+            Patcher.SuffixPatch<MyGuiScreenAdminMenu>("RequestChange", BindingFlags.NonPublic | BindingFlags.Static, new Type[2] { typeof(long), typeof(long) }, nameof(BalanceChange));
+            Patcher.SuffixPatch<MyGuiScreenAdminMenu>("RequestChangeReputation", BindingFlags.NonPublic | BindingFlags.Static | BindingFlags.Instance, new Type[4] { typeof(long), typeof(long), typeof(int), typeof(bool) }, nameof(RepChange));
 
 
 

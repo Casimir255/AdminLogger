@@ -1,6 +1,7 @@
 ﻿using NLog;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
 using System.Text;
@@ -84,7 +85,14 @@ namespace AdminLogger
                     Log.Error("Unable to find calling class!");
                 }
 
-                MethodInfo PatchedMethod = CallingClassType.GetMethod(ReplaceMentMethodName, BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic);
+                MethodInfo PatchedMethod = CallingClassType.GetMethod(ReplaceMentMethodName, BindingFlags.Static | BindingFlags.NonPublic);
+
+                if (PatchedMethod == null)
+                {
+                    Log.Error("Unable to find replacement method " + ReplaceMentMethodName + "." + CallingClassType.Name);
+                    return null;
+                }
+
 
                 if (PreFix)
                 {
