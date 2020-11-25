@@ -62,6 +62,9 @@ namespace AdminLogger
 
             _pm = torch.Managers.GetManager<PatchManager>();
             _context = _pm.AcquireContext();
+
+            Patcher.InitilizePatcherContext(_context);
+
         }
 
 
@@ -93,57 +96,16 @@ namespace AdminLogger
 
         private static void ApplyPatch(PatchContext ctx)
         {
-            var SaveMethod = typeof(MyBuildComponentBase).GetMethod("BeforeCreateBlock", BindingFlags.Public | BindingFlags.Instance, null,
-            new Type[4] {
-                typeof(MyCubeBlockDefinition),
-                typeof(MyEntity),
-                typeof(MyObjectBuilder_CubeBlock),
-                typeof(bool)
 
-            }, null);
-            if (SaveMethod == null)
-            {
-                throw new InvalidOperationException("Couldn't find BeforeCreateBlock");
-            }
-            ctx.GetPattern(SaveMethod).Suffixes.Add(Method(nameof(PlacedBlock)));
+            Patcher.SuffixPatch<MyBuildComponentBase>("BeforeCreateBlock", BindingFlags.Public | BindingFlags.Instance, new Type[4] { typeof(MyCubeBlockDefinition), typeof(MyEntity), typeof(MyObjectBuilder_CubeBlock), typeof(bool) }, nameof(PlacedBlock));
 
-
-            var AdminModeChangedMethod = typeof(MyGuiScreenAdminMenu).GetMethod("AdminSettingsChanged", BindingFlags.NonPublic | BindingFlags.Static | BindingFlags.Instance, null,
-new Type[2] {
-                typeof(AdminSettingsEnum),
-                typeof(ulong)
-
-}, null);
-            if (AdminModeChangedMethod == null)
-            {
-                throw new InvalidOperationException("Couldn't find AdminModeChanged");
-            }
-            ctx.GetPattern(AdminModeChangedMethod).Prefixes.Add(Method(nameof(AdminModeChanged)));
-
-
-            var CreativeChangedMethod = typeof(MySession).GetMethod("OnCreativeToolsEnabled", BindingFlags.NonPublic | BindingFlags.Static | BindingFlags.Instance, null,
-new Type[1] {
-                typeof(bool)
-
-}, null);
-            if (CreativeChangedMethod == null)
-            {
-                throw new InvalidOperationException("Couldn't find EnableCreativeTools");
-            }
-            ctx.GetPattern(CreativeChangedMethod).Prefixes.Add(Method(nameof(CreativeChanged)));
-
-
-
-            var RequestSpawnCreativeMethod = typeof(MyFloatingObjects).GetMethod("RequestSpawnCreative_Implementation", BindingFlags.NonPublic | BindingFlags.Static | BindingFlags.Instance, null,
-new Type[1] {
-                typeof(MyObjectBuilder_FloatingObject)
-
-}, null);
-            if (RequestSpawnCreativeMethod == null)
-            {
-                throw new InvalidOperationException("Couldn't find EnableCreativeTools");
-            }
-            ctx.GetPattern(RequestSpawnCreativeMethod).Prefixes.Add(Method(nameof(RequestItemSpawn)));
+            Patcher.PrePatch<MyGuiScreenAdminMenu>("AdminSettingsChanged", BindingFlags.NonPublic | BindingFlags.Static, new Type[2] {typeof(AdminSettingsEnum), typeof(ulong)}, nameof(AdminModeChanged));
+            Patcher.PrePatch<MySession>("OnCreativeToolsEnabled", BindingFlags.NonPublic | BindingFlags.Static, new Type[1] {typeof(bool)}, nameof(CreativeChanged));
+            Patcher.PrePatch<MyFloatingObjects>("RequestSpawnCreative_Implementation", BindingFlags.NonPublic | BindingFlags.Static, new Type[1] { typeof(MyObjectBuilder_FloatingObject) }, nameof(RequestItemSpawn));
+            Patcher.SuffixPatch<MyCubeGrid>("TryPasteGrid_Implementation", BindingFlags.Public | BindingFlags.Static, new Type[1] { typeof(MyPasteGridParameters) }, nameof(AfterSpawnGrid));
+            Patcher.PrePatch<MyFloatingObjects>("OnGridClosedRequest", BindingFlags.NonPublic | BindingFlags.Static, new Type[1] { typeof(long) }, nameof(GridClose));
+            Patcher.SuffixPatch<MyGuiScreenAdminMenu>("RequestChange", BindingFlags.Public | BindingFlags.Static, new Type[2] { typeof(long), typeof(long) }, nameof(BalanceChange));
+            Patcher.SuffixPatch<MyGuiScreenAdminMenu>("RequestChangeReputation", BindingFlags.Public | BindingFlags.Static, new Type[4] { typeof(long), typeof(long), typeof(int), typeof(bool) }, nameof(RepChange));
 
 
 
@@ -153,101 +115,19 @@ new Type[1] {
                 throw new InvalidOperationException("Couldn't find MyGuiScreenDebugSpawnMenu");
             }
 
-            var RequestSpawnCreativeCargoMethod = type.GetMethod("SpawnIntoContainer_Implementation", BindingFlags.NonPublic | BindingFlags.Static | BindingFlags.Instance, null,
-new Type[4] {
-                typeof(long),
-                typeof(SerializableDefinitionId),
-                typeof(long),
-                typeof(long)
-
-}, null);
+            var RequestSpawnCreativeCargoMethod = type.GetMethod("SpawnIntoContainer_Implementation", BindingFlags.NonPublic | BindingFlags.Static | BindingFlags.Instance, null, new Type[4] {typeof(long),typeof(SerializableDefinitionId),typeof(long),typeof(long)}, null);
             if (RequestSpawnCreativeCargoMethod == null)
             {
                 throw new InvalidOperationException("Couldn't find EnableCreativeTools");
             }
             ctx.GetPattern(RequestSpawnCreativeCargoMethod).Suffixes.Add(Method(nameof(SpawnIntoContainer)));
 
-
-
-
-
-            var AfterGridPaste = typeof(MyCubeGrid).GetMethod("TryPasteGrid_Implementation", BindingFlags.Public | BindingFlags.Static | BindingFlags.Instance, null,
-new Type[1] {
-                typeof(MyPasteGridParameters)
-
-}, null);
-            if (AfterGridPaste == null)
-            {
-                throw new InvalidOperationException("Couldn't find AfterPaste");
-            }
-            ctx.GetPattern(AfterGridPaste).Suffixes.Add(Method(nameof(AfterSpawnGrid)));
-
-
-            var DeleteGrid = typeof(MyCubeGrid).GetMethod("OnGridClosedRequest", BindingFlags.NonPublic | BindingFlags.Static | BindingFlags.Instance, null,
-new Type[1] {
-                typeof(long),
-
-
-}, null);
-            if (DeleteGrid == null)
-            {
-                throw new InvalidOperationException("Couldn't find OnGridClosedRequest");
-            }
-            ctx.GetPattern(DeleteGrid).Prefixes.Add(Method(nameof(GridClose)));
-
-
-
-            var AdminBalanceChange = typeof(MyGuiScreenAdminMenu).GetMethod("RequestChange", BindingFlags.NonPublic | BindingFlags.Static | BindingFlags.Instance, null,
-new Type[2] {
-                typeof(long),
-                typeof(long)
-
-
-}, null);
-            if (AdminBalanceChange == null)
-            {
-                throw new InvalidOperationException("Couldn't find RequestChange");
-            }
-            ctx.GetPattern(AdminBalanceChange).Suffixes.Add(Method(nameof(BalanceChange)));
-
-
-
-            var AdminRepChange = typeof(MyGuiScreenAdminMenu).GetMethod("RequestChangeReputation", BindingFlags.NonPublic | BindingFlags.Static | BindingFlags.Instance, null,
-new Type[4] {
-                typeof(long),
-                typeof(long),
-                typeof(int),
-                typeof(bool)
-
-
-}, null);
-            if (AdminRepChange == null)
-            {
-                throw new InvalidOperationException("Couldn't find RequestReputation");
-            }
-            ctx.GetPattern(AdminRepChange).Suffixes.Add(Method(nameof(RepChange)));
-
-
-
-            var OnTeleport = typeof(MyMultiplayer).GetMethod("OnTeleport", BindingFlags.NonPublic | BindingFlags.Static | BindingFlags.Instance, null,
-new Type[2] {
-                typeof(ulong),
-                typeof(Vector3D)
-}, null);
+            var OnTeleport = typeof(MyMultiplayer).GetMethod("OnTeleport", BindingFlags.NonPublic | BindingFlags.Static | BindingFlags.Instance, null, new Type[2] {typeof(ulong), typeof(Vector3D)}, null);
             if (OnTeleport == null)
             {
                 throw new InvalidOperationException("Couldn't find OnTeleport");
             }
             ctx.GetPattern(OnTeleport).Suffixes.Add(Method(nameof(TeleportRequest)));
-
-
-
-
-
-
-
-
-            //OnEntityOperationClicked
         }
 
         private static MethodInfo Method(string v)
