@@ -80,7 +80,7 @@ namespace AdminLogger
 
             var logTarget = new FileTarget
             {
-                FileName = "Logs/AdminLogs/AdminLog-${shortdate}.log",
+                FileName = "Logs/AdminLog-${shortdate}.log",
                 Layout = "${var:logStamp} ${logger}: ${var:logContent}",
                 
             };
