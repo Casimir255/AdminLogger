@@ -148,6 +148,8 @@ namespace AdminLogger
 
         private static void AdminModeChanged(AdminSettingsEnum settings, ulong steamId)
         {
+          
+
             AdminSettingsEnum OldSettings = new AdminSettingsEnum();
             try
             {
@@ -160,12 +162,15 @@ namespace AdminLogger
             }
 
             MyPlayer Player = MySession.Static.Players.TryGetPlayerBySteamId(steamId);
+           
 
             //Sanity Vibe Checks
             if (Player == null || Player.DisplayName == null)
             {
                 return;
             }
+
+          
 
             string PlayerName = Player.DisplayName;
 
