@@ -108,7 +108,7 @@ namespace AdminLogger
         }
 
             
-        [Command("clearadminsettings", "Lists the current enabled admin settings for the given user")]
+        [Command("clearadminsettings", "Clears the admin settings for the current user")]
         [Permission(MyPromoteLevel.Admin)]
         public void ClearAdminSettingsForUser(string NameOrId)
         {
@@ -132,16 +132,36 @@ namespace AdminLogger
                 return;
             }
 
+
+            ClearAdminSetting(Result);
+            Context.Respond("Successfully reset admin settings!");
+        }
+
+        [Command("clearalladminsettings", "Clears all admin settings for all players")]
+        [Permission(MyPromoteLevel.Admin)]
+        public void ClearAllAdminSettings()
+        {
+            int Count = 0;
+            foreach(var player in MySession.Static.RemoteAdminSettings)
+            {
+                ClearAdminSetting(player.Key);
+                Count++;
+            }
+
+            Context.Respond($"Successfully cleared all {Count} admin settings!");
+        }
+
+
+        private void ClearAdminSetting(ulong Player)
+        {
             AdminSettingsEnum PlayerSettings = new AdminSettingsEnum();
 
-            MySession.Static.RemoteAdminSettings[Result] = PlayerSettings;
+            MySession.Static.RemoteAdminSettings[Player] = PlayerSettings;
 
             //MySession.Static.EnableCreativeTools(Result, false);
             MethodInfo P = typeof(MyGuiScreenAdminMenu).GetMethod("AdminSettingsChangedClient", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Static);
 
-            Events.RaiseStaticEvent<AdminSettingsEnum, ulong>(P, PlayerSettings, Result, new EndpointId(Result));
-
-            Context.Respond("Successfully reset admin settings!");
+            Events.RaiseStaticEvent<AdminSettingsEnum, ulong>(P, PlayerSettings, Player, new EndpointId(Player));
         }
     }
 }
