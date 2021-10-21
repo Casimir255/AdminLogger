@@ -463,8 +463,6 @@ namespace AdminLogger
             Log.Warn(string.Format("{0} requested reputation change of {1} on player {2} of faction {3}", PlayerName, reputationChange, ToPlayer.DisplayName, fac.Tag));
         }
 
-
-
         private static void TeleportRequest(ulong userId, Vector3D location)
         {
             ulong PlayerID = MyEventContext.Current.Sender.Value;
@@ -492,6 +490,9 @@ namespace AdminLogger
             Log.Warn(string.Format("{0} teleported to {1}", PlayerName, location.ToString()));
 
         }
+
+
+
 
 
 

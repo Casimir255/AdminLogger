@@ -142,12 +142,17 @@ namespace AdminLogger
         public void ClearAllAdminSettings()
         {
             int Count = 0;
-            foreach(var player in MySession.Static.RemoteAdminSettings)
+
+
+            for (int index = 0; index < MySession.Static.RemoteAdminSettings.Count; index++)
             {
-                ClearAdminSetting(player.Key);
+                ulong Player = MySession.Static.RemoteAdminSettings.ElementAt(index).Key;
+                ClearAdminSetting(Player);
                 Count++;
+
             }
 
+ 
             Context.Respond($"Successfully cleared all {Count} admin settings!");
         }
 
