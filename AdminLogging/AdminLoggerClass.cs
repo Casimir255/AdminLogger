@@ -32,7 +32,7 @@ namespace AdminLogger.AdminLogging
 
         public static void ApplyPatch(Harmony ctx)
         {
-
+            //Dumb ass types (I can use harmony but idc)
             Type type = typeof(MyGuiScreenDebugBase).Assembly.GetType("Sandbox.Game.Gui.MyGuiScreenDebugSpawnMenu");
             if (type == null)
             {
@@ -198,7 +198,7 @@ namespace AdminLogger.AdminLogging
 
 
 
-        [HarmonyPostfix]
+        [HarmonyPrefix]
         [HarmonyPatch(typeof(MySession), "OnCreativeToolsEnabled")]
         private static void CreativeChanged(bool value)
         {
