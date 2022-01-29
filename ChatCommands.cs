@@ -7,10 +7,15 @@ using System.Linq;
 using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
-using Torch.Commands;
-using Torch.Commands.Permissions;
 using VRage.Game.ModAPI;
 using VRage.Network;
+using Torch.API.Managers;
+using Torch.API.Plugins;
+using Torch.API.Session;
+using Torch.Managers;
+using Torch.Session;
+using Torch.Commands;
+using Torch.Commands.Permissions;
 
 namespace AdminLogger
 {

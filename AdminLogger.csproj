@@ -9,9 +9,10 @@
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>AdminLogger</RootNamespace>
     <AssemblyName>AdminLogger</AssemblyName>
-    <TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.8</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <Deterministic>true</Deterministic>
+    <TargetFrameworkProfile />
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -75,6 +76,10 @@
       <HintPath>..\..\..\Desktop\TorchServers\torch-server\Torch.API.dll</HintPath>
       <Private>False</Private>
     </Reference>
+    <Reference Include="Torch.Server">
+      <HintPath>..\..\..\Desktop\TorchServers\torch-server\Torch.Server.exe</HintPath>
+      <Private>False</Private>
+    </Reference>
     <Reference Include="VRage">
       <HintPath>..\..\..\..\..\Program Files (x86)\Steam\steamapps\common\SpaceEngineers\Bin64\VRage.dll</HintPath>
       <Private>False</Private>
@@ -93,11 +98,20 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="AdminLogging\AdminLoggerClass.cs" />
     <Compile Include="ChatCommands.cs" />
     <Compile Include="Events.cs" />
     <Compile Include="Main.cs" />
-    <Compile Include="Patcher.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="AntiCheat\" />
+    <Folder Include="Configs\" />
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="Lib.Harmony">
+      <Version>2.2.0</Version>
+    </PackageReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
