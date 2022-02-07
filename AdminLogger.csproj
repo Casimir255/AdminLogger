@@ -99,13 +99,13 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="AdminLogging\AdminLoggerClass.cs" />
+    <Compile Include="AntiCheat\AntiCheat.cs" />
     <Compile Include="ChatCommands.cs" />
     <Compile Include="Events.cs" />
     <Compile Include="Main.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
-    <Folder Include="AntiCheat\" />
     <Folder Include="Configs\" />
   </ItemGroup>
   <ItemGroup>

@@ -31,7 +31,7 @@ namespace AdminLogger
 
         public override void Init(ITorchBase torch)
         {
-            //SetLoggingRules();
+            SetLoggingRules();
 
 
             Log.Warn("Lauching Big Brother Protocal");
@@ -62,13 +62,13 @@ namespace AdminLogger
                 
             };
 
-            Target Rule = LogManager.Configuration.AllTargets.FirstOrDefault(x => x.Name == "console");
-            if (Rule == null)
-                Log.Info("Didnt find rule");
-            else
-            {
-                Log.Info("Found rule!");
-            }
+           // Target Rule = LogManager.Configuration.AllTargets.FirstOrDefault(x => x.Name == "console");
+           // if (Rule != null)
+           // {
+               // var ConsoleRule = new LoggingRule("console", LogLevel.Debug, logTarget) { Final = true };
+               // LogManager.Configuration.LoggingRules.Insert(1, ConsoleRule);
+           // }
+
 
 
             var fullRule = new LoggingRule("AdminLogger", LogLevel.Debug, logTarget) { Final = true  };

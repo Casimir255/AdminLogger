@@ -197,7 +197,6 @@ namespace AdminLogger.AdminLogging
         }
 
 
-
         [HarmonyPrefix]
         [HarmonyPatch(typeof(MySession), "OnCreativeToolsEnabled")]
         private static void CreativeChanged(bool value)
@@ -266,7 +265,6 @@ namespace AdminLogger.AdminLogging
         }
 
 
-
         private static void SpawnIntoContainer(long amount, SerializableDefinitionId item, long entityId, long playerId)
         {
             MyIdentity Player = MySession.Static.Players.TryGetIdentity(playerId);
@@ -276,10 +274,11 @@ namespace AdminLogger.AdminLogging
             {
                 return;
             }
+ 
+            Log.Warn($"{item.TypeId} - {item.SubtypeId}");
 
             Log.Warn(string.Format("{0} spawned {1} {2} into container", Player.DisplayName, amount, item.SubtypeName));
         }
-
 
         [HarmonyPostfix]
         [HarmonyPatch(typeof(MyCubeGrid), "TryPasteGrid_Implementation")]
@@ -417,7 +416,6 @@ namespace AdminLogger.AdminLogging
 
             Log.Warn(string.Format("{0} requested reputation change of {1} on player {2} of faction {3}", PlayerName, reputationChange, ToPlayer.DisplayName, fac.Tag));
         }
-
 
         private static void TeleportRequest(ulong userId, Vector3D location)
         {
