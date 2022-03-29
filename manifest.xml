@@ -1,0 +1,7 @@
+﻿<?xml version="1.0"?>
+<PluginManifest xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+	<Name>Admin Logger</Name>
+	<Guid>610d6b05-94a0-4bb1-845c-e6c848115171</Guid>
+	<Repository>Admin Logger</Repository>
+	<Version>v1.6.2</Version>
+</PluginManifest>

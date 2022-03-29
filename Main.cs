@@ -31,12 +31,20 @@ namespace AdminLogger
 
         public override void Init(ITorchBase torch)
         {
-            SetLoggingRules();
+            try
+            {
+
+                //SetLoggingRules();
 
 
-            Log.Warn("Lauching Big Brother Protocal");
+                Log.Warn("Lauching Big Brother Protocal");
 
-            ApplyPatch();
+                ApplyPatch();
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex);
+            }
         }
 
 
@@ -46,9 +54,9 @@ namespace AdminLogger
 
             for (int i = rules.Count - 1; i >= 0; i--)
             {
-                
 
-                if (rules[i].LoggerNamePattern != "AdminLogger") 
+
+                if (rules[i].LoggerNamePattern != "AdminLogger")
                     continue;
 
                 rules.RemoveAt(i);
@@ -59,19 +67,15 @@ namespace AdminLogger
             {
                 FileName = "Logs/AdminLog-${shortdate}.log",
                 Layout = "${var:logStamp} ${logger}: ${var:logContent}",
-                
+
             };
 
-           // Target Rule = LogManager.Configuration.AllTargets.FirstOrDefault(x => x.Name == "console");
-           // if (Rule != null)
-           // {
-               // var ConsoleRule = new LoggingRule("console", LogLevel.Debug, logTarget) { Final = true };
-               // LogManager.Configuration.LoggingRules.Insert(1, ConsoleRule);
-           // }
+
+ 
 
 
 
-            var fullRule = new LoggingRule("AdminLogger", LogLevel.Debug, logTarget) { Final = true  };
+            var fullRule = new LoggingRule("AdminLogger", LogLevel.Debug, logTarget) { Final = true };
 
 
 
@@ -86,7 +90,8 @@ namespace AdminLogger
                 Patcher.PatchAll();
                 AdminLoggerClass.ApplyPatch(Patcher);
 
-            }catch(Exception ex)
+            }
+            catch (Exception ex)
             {
                 Log.Fatal(ex);
             }

@@ -80,8 +80,17 @@ namespace AdminLogger.AdminLogging
 
         [HarmonyPrefix]
         [HarmonyPatch(typeof(MyGuiScreenAdminMenu), "AdminSettingsChanged")]
-        private static void AdminModeChanged(AdminSettingsEnum settings, ulong steamId)
+        private static void AdminModeChanged(AdminSettingsEnum settings)
         {
+
+            ulong steamId = MyEventContext.Current.Sender.Value;
+            if (MySession.Static.OnlineMode != 0 && (((settings & AdminSettingsEnum.AdminOnly) > AdminSettingsEnum.None && !MySession.Static.IsUserAdmin(steamId)) || !MySession.Static.IsUserModerator(steamId)))
+            {
+                Log.Warn($"Player {steamId} tried to change their admins settings but they arent an admin or mod. Are they cheating?");
+                return;
+            }
+
+
 
 
             AdminSettingsEnum OldSettings = new AdminSettingsEnum();
