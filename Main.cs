@@ -34,7 +34,7 @@ namespace AdminLogger
             try
             {
 
-                //SetLoggingRules();
+                SetLoggingRules();
 
 
                 Log.Warn("Lauching Big Brother Protocal");

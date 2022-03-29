@@ -22,6 +22,8 @@ using static Sandbox.Game.Entities.MyCubeGrid;
 
 namespace AdminLogger.AntiCheat
 {
+
+    /*
     [HarmonyPatch]
     public class AntiCheat
     {
@@ -125,10 +127,12 @@ namespace AdminLogger.AntiCheat
 
 
 
-
+    */
 
 
         /* Timer block patch */
+
+    /*
         [HarmonyPrefix]
         [HarmonyPatch(typeof(MyTimerBlock), "Start")]
         private static bool Start(MyTimerBlock __instance)
@@ -184,6 +188,9 @@ namespace AdminLogger.AntiCheat
         }
 
     }
+
+*/
+
 }
 
 
