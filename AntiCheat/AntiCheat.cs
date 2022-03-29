@@ -166,6 +166,8 @@ namespace AdminLogger.AntiCheat
         [HarmonyPatch(typeof(MyGridJumpDriveSystem), "OnRequestJumpFromClient")]
         private static bool OnRequestJumpFromClient(MyGridJumpDriveSystem __instance, Vector3D jumpTarget, long userId)
         {
+            return true;
+
             MyCubeGrid Grid = (MyCubeGrid)GridJumpSystemProp.GetValue(__instance);
 
 
