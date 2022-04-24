@@ -17,6 +17,7 @@ using System.Linq;
 using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
+using System.Timers;
 using VRage;
 using VRage.Collections;
 using VRage.Game.Entity;
@@ -27,11 +28,11 @@ using static Sandbox.Game.Entities.MyCubeGrid;
 
 namespace AdminLogger.AdminLogging
 {
-    /*
+    
     public class AntiCheatClass
     {
 
-        private static readonly Logger Log = LogManager.GetCurrentClassLogger();
+        private static readonly Logger Log = LogManager.GetLogger("AdminLogger");
 
         public static Type MyClientType = Type.GetType("VRage.Network.MyClient, VRage");
         public static Type MyCubeGridReplicable = Type.GetType("Sandbox.Game.Replication.MyCubeGridReplicable, Sandbox.Game");
@@ -46,10 +47,26 @@ namespace AdminLogger.AdminLogging
         private static MethodInfo forceForClient;
         private static MethodInfo OnPerfomJump;
 
+
+        private static int BetterNotCopyThisDori = 1;
+
+
+        private static Dictionary<ulong, int> stockPileFill = new Dictionary<ulong, int>();
+        private static Dictionary<ulong, int> buildBlockRequest = new Dictionary<ulong, int>();
+
+
+        private static Timer frequencyTimer = new Timer(1000);
+
         public static void ApplyPatching()
         {
+            if (!Main.Config.EnableAntiCheat)
+                return;
 
-           
+
+            frequencyTimer.Elapsed += FrequencyTimer_Elapsed;
+            frequencyTimer.Start();
+
+
             Patcher.PrePatch<MyCubeGrid>("BuildBlocksRequest", BindingFlags.Instance | BindingFlags.NonPublic, nameof(BuildBlocksRequest));
             Patcher.PrePatch<MyCubeGrid>("OnStockpileFillRequest", BindingFlags.Instance | BindingFlags.NonPublic, nameof(OnStockpileFillRequest));
             Patcher.PrePatch<MyInventory>("PickupItem_Implementation", BindingFlags.Instance | BindingFlags.NonPublic, nameof(PickupItem_Implementation));
@@ -66,13 +83,52 @@ namespace AdminLogger.AdminLogging
             Replicables = MyClientType.GetField("Replicables", BindingFlags.Instance | BindingFlags.Public);
             removeForClient = typeof(MyReplicationServer).GetMethod("RemoveForClient", BindingFlags.NonPublic | BindingFlags.Instance);
             UpdatableGrid = typeof(MyUpdateableGridSystem).GetProperty("Grid", BindingFlags.Instance | BindingFlags.NonPublic);
+
+
+            Patcher.SuffixPatch<MyMultiplayerServerBase>("ValidationFailed", BindingFlags.Instance | BindingFlags.Public, nameof(ValidationFailed));
             //Patcher.PrePatch<MyGridJumpDriveSystem>("PerformJump", BindingFlags.Instance | BindingFlags.NonPublic, nameof(BeforeJump));
-            Patcher.PrePatch<MyGridJumpDriveSystem>("SendPerformJump", BindingFlags.Instance | BindingFlags.NonPublic, nameof(SendPerformJump));
-            OnPerfomJump = Patcher.GetMethod<MyGridJumpDriveSystem>("OnPerformJump", BindingFlags.Static | BindingFlags.NonPublic);
+            
+            //Patcher.PrePatch<MyGridJumpDriveSystem>("SendPerformJump", BindingFlags.Instance | BindingFlags.NonPublic, nameof(SendPerformJump));
+            //OnPerfomJump = Patcher.GetMethod<MyGridJumpDriveSystem>("OnPerformJump", BindingFlags.Static | BindingFlags.NonPublic);
 
         }
 
+        private static void FrequencyTimer_Elapsed(object sender, ElapsedEventArgs e)
+        {
+            //Check stockpile
+            var kvpStock = stockPileFill.ToList();
+            var kvpBuild = buildBlockRequest.ToList();
 
+         
+            foreach(var vp in kvpStock)
+            {
+                if(vp.Value > 8)
+                {
+                    Log.Warn($"Player {vp.Key} filled {vp.Value} blocks with items in less than a second! Could this be cheating?");
+                }else if (vp.Value > 100)
+                {
+                    banClient(vp.Key, $"Player filled too many blocks with possible known exploit! {vp.Value} blocks filled!");
+                }
+            }
+
+
+
+            foreach (var vp in kvpBuild)
+            {
+                if (vp.Value > 8)
+                {
+                    Log.Warn($"Player {vp.Key} built {vp.Value} blocks with items in less than a second! Could this be cheating?");
+                }
+                else if (vp.Value > 100)
+                {
+                    banClient(vp.Key, $"Player built too many blocks with possible known exploit! {vp.Value} blocks build!");
+                }
+            }
+
+            buildBlockRequest.Clear();
+            stockPileFill.Clear();
+
+        }
 
         //Calls when you are trying to build blocks
         private static bool BuildBlocksRequest(MyBlockVisuals visuals, HashSet<MyBlockLocation> locations, long builderEntityId, bool instantBuild, long ownerId)
@@ -82,16 +138,31 @@ namespace AdminLogger.AdminLogging
 
 
             ulong EventOwner = MyEventContext.Current.Sender.Value;
-            if (!MySession.Static.CreativeMode && locations.Count > 1 && !MySession.Static.HasPlayerCreativeRights(EventOwner))
+            bool hasCreative = MySession.Static.HasPlayerCreativeRights(EventOwner);
+            if (!MySession.Static.CreativeMode && locations.Count > 1 && !hasCreative)
             {
-                Log.Error($"{EventOwner} was denied buildblocks request! Attempting to build {locations.Count} blocks and they are not admin! How is this possible!? Cheats?");
+                banClient(EventOwner, "was denied buildblocks request! Attempting to build {locations.Count} blocks and they are not admin! How is this possible!? Cheats?");
                 return false;
             }
 
-            Log.Error($"{EventOwner} was building blocks!");
+            if (!hasCreative)
+            {
+
+                if (buildBlockRequest.ContainsKey(EventOwner))
+                {
+                    buildBlockRequest[EventOwner] += locations.Count;
+                }
+                else
+                {
+                    buildBlockRequest.Add(EventOwner, locations.Count);
+                }
+
+                Log.Error($"{EventOwner} was building {locations.Count} blocks!");
+            }
+
+
             return true;
         }
-
 
 
         //Calls every time you fill a block from your inventory
@@ -101,7 +172,17 @@ namespace AdminLogger.AdminLogging
                 return true;
 
             ulong EventOwner = MyEventContext.Current.Sender.Value;
-            Log.Error($"{EventOwner} Request fill stockpile");
+            if (stockPileFill.ContainsKey(EventOwner))
+            {
+                stockPileFill[EventOwner] += 1;
+            }
+            else
+            {
+                stockPileFill.Add(EventOwner, 1);
+            }
+
+           
+            Log.Warn($"{EventOwner} Requested fill stockpile");
             return true;
         }
 
@@ -129,8 +210,8 @@ namespace AdminLogger.AdminLogging
             double Distance = Vector3D.Distance(entity.PositionComp.GetPosition(), InvOwner.PositionComp.GetPosition());
             if (Distance > 15)
             {
-                Log.Error($"{EventOwner} tried to pick up an item that was {Distance}m away! Blocking and banning!");
-                MyMultiplayer.Static.BanClient(EventOwner, true);
+                Log.Error($"{EventOwner}");
+                banClient(EventOwner, $" tried to pick up an item that was {Distance}m away! Was there Lag? Blocking and banning!");
                 return false;
             }
 
@@ -148,13 +229,10 @@ namespace AdminLogger.AdminLogging
             if (MySession.Static.HasPlayerCreativeRights(EventOwner))
                 return true;
 
-            Log.Error($"{EventOwner} tried to remove blocks using keen exploit and is not admin! Blocking and banning!");
-            MyMultiplayer.Static.BanClient(EventOwner, true);
+
+            banClient(EventOwner, $"tried to remove {locations.Count} blocks using keen exploit and is not admin! Blocking and banning!");
             return false;
         }
-
-
-
 
         private static bool SendPerformJump(MyGridJumpDriveSystem __instance, Vector3D jumpTarget)
         {
@@ -262,16 +340,16 @@ namespace AdminLogger.AdminLogging
             return false;
         }
 
-
-
+        public static void ValidationFailed(ulong clientId, bool kick = true, string additionalInfo = null, bool stackTrace = true)
+        {
+            Log.Error($"Client: {clientId} Kick: {kick} Info: {additionalInfo} Stack: \n {Environment.StackTrace}");
+        }
 
 
 
 
 
         // Timer block patch
-
-
         private static bool Start(MyTimerBlock __instance)
         {
 
@@ -287,6 +365,7 @@ namespace AdminLogger.AdminLogging
 
             return true;
         }
+
         private static bool Trigger(MyTimerBlock __instance)
         {
             if (__instance.OwnerId == 0)
@@ -298,10 +377,27 @@ namespace AdminLogger.AdminLogging
             return true;
         }
 
+        private static void banClient(ulong id, string reason)
+        {
+            if (MyMultiplayer.Static.BannedClients.Contains(id))
+                return;
+
+
+            if (Main.Config.EnableAutoBan)
+            {
+                Log.Warn($"User {id} was banned! Reason: {reason}");
+                MyMultiplayer.Static.BanClient(id, true);
+            }
+            else
+            {
+                Log.Warn($"User {id} should be banned! Reason: {reason}");
+            }
+        }
+
        
 
     }
-*/
+
 
 
 }

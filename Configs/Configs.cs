@@ -13,6 +13,11 @@ namespace AdminLogger.Configs
         private bool _AdminLoggerOwnLog = true;
         public bool AdminLoggerOwnLog { get => _AdminLoggerOwnLog; set => SetValue(ref _AdminLoggerOwnLog, value); }
 
+        private bool _EnableAntiCheat = true;
+        public bool EnableAntiCheat { get => _EnableAntiCheat; set => SetValue(ref _EnableAntiCheat, value); }
+
+        private bool _EnableAutoBan = true;
+        public bool EnableAutoBan { get => _EnableAutoBan; set => SetValue(ref _EnableAutoBan, value); }
 
     }
 }
