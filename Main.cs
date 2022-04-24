@@ -14,6 +14,11 @@ using Torch.Session;
 using System.Reflection;
 using System.Linq;
 using System;
+using AdminLogger.Utils;
+using Torch.Managers.PatchManager;
+using AdminLogger.AntiCheat;
+using AdminLogger.Configs;
+using System.IO;
 
 namespace AdminLogger
 {
@@ -21,24 +26,32 @@ namespace AdminLogger
     {
         private static readonly Logger Log = LogManager.GetLogger("AdminLogger");
 
-        private static Harmony Patcher = new Harmony("AdminLogger");
-
         private static MethodInfo DenyPlayersProfiling;
+        private static PatchManager _pm;
+        private static PatchContext _context { get; set; }
 
 
+        public static Settings Config => _config?.Data;
+        public static Persistent<Settings> _config;
 
         public bool ServerRunning { get; private set; }
+
 
         public override void Init(ITorchBase torch)
         {
             try
             {
-
+                string path = Path.Combine(StoragePath, "AdminLogger.cfg");
+                _config = Persistent<Settings>.Load(path);
                 SetLoggingRules();
 
 
-                Log.Warn("Lauching Big Brother Protocal");
+                _pm = torch.Managers.GetManager<PatchManager>();
+                _context = _pm.AcquireContext();
 
+
+                Log.Warn("Lauching Big Brother Protocal");
+             
                 ApplyPatch();
             }
             catch (Exception ex)
@@ -50,11 +63,14 @@ namespace AdminLogger
 
         private void SetLoggingRules()
         {
+            if (!Config.AdminLoggerOwnLog)
+                return;
+
             var rules = LogManager.Configuration.LoggingRules;
 
             for (int i = rules.Count - 1; i >= 0; i--)
             {
-
+                //Log.Warn(rules[i].LoggerNamePattern);
 
                 if (rules[i].LoggerNamePattern != "AdminLogger")
                     continue;
@@ -83,13 +99,20 @@ namespace AdminLogger
             LogManager.Configuration.Reload();
         }
 
+
         private static void ApplyPatch()
         {
             try
             {
-                Patcher.PatchAll();
-                AdminLoggerClass.ApplyPatch(Patcher);
 
+                Patcher.InitilizePatcherContext(_context);
+
+                //AntiCheatClass.ApplyPatching();
+                Harmony s = new Harmony("AdminLogger");
+                s.PatchAll();
+
+                AdminLoggerClass.ApplyPatch(s);
+                JoinValidation m = new JoinValidation();
             }
             catch (Exception ex)
             {

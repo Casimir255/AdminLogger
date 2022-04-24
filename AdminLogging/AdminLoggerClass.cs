@@ -26,7 +26,7 @@ namespace AdminLogger.AdminLogging
     [HarmonyPatch]
     public static class AdminLoggerClass
     {
-        private static readonly Logger Log = LogManager.GetCurrentClassLogger();
+        private static readonly Logger Log = LogManager.GetLogger("AdminLogger");
 
 
 

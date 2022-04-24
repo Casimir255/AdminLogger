@@ -52,6 +52,10 @@
       <HintPath>..\..\..\Desktop\TorchServers\torch-server1\DedicatedServer64\SpaceEngineers.ObjectBuilders.XmlSerializers.dll</HintPath>
       <Private>False</Private>
     </Reference>
+    <Reference Include="Steamworks.NET">
+      <HintPath>..\..\..\Desktop\TorchServers\torch-server1\DedicatedServer64\Steamworks.NET.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Xml.Linq" />
@@ -66,6 +70,10 @@
     </Reference>
     <Reference Include="Torch.API">
       <HintPath>..\..\..\Desktop\TorchServers\torch-server1\Torch.API.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Torch.Server">
+      <HintPath>..\..\..\Desktop\TorchServers\torch-server1\Torch.Server.exe</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="VRage">
@@ -84,18 +92,23 @@
       <HintPath>..\..\..\Desktop\TorchServers\torch-server1\DedicatedServer64\VRage.Math.dll</HintPath>
       <Private>False</Private>
     </Reference>
+    <Reference Include="VRage.Steam">
+      <HintPath>..\..\..\Desktop\TorchServers\torch-server1\DedicatedServer64\VRage.Steam.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="AdminLogging\AdminLoggerClass.cs" />
-    <Compile Include="AntiCheat\AntiCheat.cs" />
+    <Compile Include="AntiCheat\AntiCheatClass.cs" />
+    <Compile Include="AntiCheat\JoinValidation.cs" />
     <Compile Include="ChatCommands.cs" />
+    <Compile Include="Configs\Configs.cs" />
     <Compile Include="Events.cs" />
     <Compile Include="Main.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Utils\Patcher.cs" />
   </ItemGroup>
-  <ItemGroup>
-    <Folder Include="Configs\" />
-  </ItemGroup>
+  <ItemGroup />
   <ItemGroup>
     <PackageReference Include="Lib.Harmony">
       <Version>2.2.1</Version>
