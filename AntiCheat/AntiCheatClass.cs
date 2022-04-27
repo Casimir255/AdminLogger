@@ -28,10 +28,8 @@ using static Sandbox.Game.Entities.MyCubeGrid;
 
 namespace AdminLogger.AdminLogging
 {
-    
     public class AntiCheatClass
     {
-
         private static readonly Logger Log = LogManager.GetLogger("AdminLogger");
 
         public static Type MyClientType = Type.GetType("VRage.Network.MyClient, VRage");
@@ -207,11 +205,12 @@ namespace AdminLogger.AdminLogging
                 return false;
 
 
+            float ss = MySession.Static.SessionSimSpeedServer;
             double Distance = Vector3D.Distance(entity.PositionComp.GetPosition(), InvOwner.PositionComp.GetPosition());
-            if (Distance > 15)
+            if (Distance > (15*ss))
             {
-                Log.Error($"{EventOwner}");
-                banClient(EventOwner, $" tried to pick up an item that was {Distance}m away! Was there Lag? Blocking and banning!");
+                Log.Info($"{EventOwner} tried to pick up an item that was {Distance}m away! Was there Lag? Server SS: {ss}. Blocking access!");
+                //banClient(EventOwner, $" tried to pick up an item that was {Distance}m away! Was there Lag? Blocking and banning!");
                 return false;
             }
 
@@ -383,14 +382,14 @@ namespace AdminLogger.AdminLogging
                 return;
 
 
-            if (Main.Config.EnableAutoBan)
+            if (false)
             {
                 Log.Warn($"User {id} was banned! Reason: {reason}");
                 MyMultiplayer.Static.BanClient(id, true);
             }
             else
             {
-                Log.Warn($"User {id} should be banned! Reason: {reason}");
+                Log.Warn($"User {id} possibly cheated! Reason: {reason}");
             }
         }
 
