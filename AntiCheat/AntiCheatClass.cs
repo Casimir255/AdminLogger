@@ -83,7 +83,7 @@ namespace AdminLogger.AdminLogging
             UpdatableGrid = typeof(MyUpdateableGridSystem).GetProperty("Grid", BindingFlags.Instance | BindingFlags.NonPublic);
 
 
-            Patcher.SuffixPatch<MyMultiplayerServerBase>("ValidationFailed", BindingFlags.Instance | BindingFlags.Public, nameof(ValidationFailed));
+            //Patcher.SuffixPatch<MyMultiplayerServerBase>("ValidationFailed", BindingFlags.Instance | BindingFlags.Public, nameof(ValidationFailed));
             //Patcher.PrePatch<MyGridJumpDriveSystem>("PerformJump", BindingFlags.Instance | BindingFlags.NonPublic, nameof(BeforeJump));
             
             //Patcher.PrePatch<MyGridJumpDriveSystem>("SendPerformJump", BindingFlags.Instance | BindingFlags.NonPublic, nameof(SendPerformJump));
@@ -337,11 +337,6 @@ namespace AdminLogger.AdminLogging
             }
 
             return false;
-        }
-
-        public static void ValidationFailed(ulong clientId, bool kick = true, string additionalInfo = null, bool stackTrace = true)
-        {
-            Log.Error($"Client: {clientId} Kick: {kick} Info: {additionalInfo} Stack: \n {Environment.StackTrace}");
         }
 
 
