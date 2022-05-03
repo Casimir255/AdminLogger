@@ -28,6 +28,8 @@ using static Sandbox.Game.Entities.MyCubeGrid;
 
 namespace AdminLogger.AdminLogging
 {
+
+    /*
     public class AntiCheatClass
     {
         private static readonly Logger Log = LogManager.GetLogger("AdminLogger");
@@ -391,6 +393,8 @@ namespace AdminLogger.AdminLogging
        
 
     }
+
+    */
 
 
 

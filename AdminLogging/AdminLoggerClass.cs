@@ -262,7 +262,7 @@ namespace AdminLogger.AdminLogging
                 string ObjectName = d.DisplayName;
 
                 Log.Warn(string.Format("{0} spawned {1} {2}", Player.DisplayName, obj.Item.Amount, ObjectName));
-                return true;
+                return false;
             }
             else
             {
