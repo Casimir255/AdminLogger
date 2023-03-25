@@ -19,10 +19,12 @@ using Torch.Managers.PatchManager;
 using AdminLogger.AntiCheat;
 using AdminLogger.Configs;
 using System.IO;
+using AdminLogger.UI;
+using System.Windows.Controls;
 
 namespace AdminLogger
 {
-    public class Main : TorchPluginBase
+    public class Main : TorchPluginBase, IWpfPlugin
     {
         private static readonly Logger Log = LogManager.GetLogger("AdminLogger");
 
@@ -35,6 +37,12 @@ namespace AdminLogger
         public static Persistent<Settings> _config;
 
         public bool ServerRunning { get; private set; }
+
+        public UserControl Control;
+        public UserControl GetControl()
+        {
+            return Control ??= new UserControlInterface();
+        }
 
 
         public override void Init(ITorchBase torch)

@@ -22,6 +22,7 @@ namespace AdminLogger.UI
     {
         public UserControlInterface()
         {
+            DataContext = Main.Config;
             InitializeComponent();
         }
     }
