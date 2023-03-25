@@ -107,7 +107,7 @@ namespace AdminLogger
 
                 Patcher.InitilizePatcherContext(_context);
 
-                //AntiCheatClass.ApplyPatching();
+                AntiCheatClass.ApplyPatching();
                 Harmony s = new Harmony("AdminLogger");
                 s.PatchAll();
 

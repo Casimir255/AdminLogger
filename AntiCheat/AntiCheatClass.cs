@@ -1,11 +1,14 @@
 ﻿using AdminLogger.Utils;
+using HarmonyLib;
 using NLog;
 using Sandbox.Engine.Multiplayer;
 using Sandbox.Engine.Physics;
 using Sandbox.Game;
 using Sandbox.Game.Entities;
 using Sandbox.Game.Entities.Character;
+using Sandbox.Game.Entities.Character.Components;
 using Sandbox.Game.GameSystems;
+using Sandbox.Game.Gui;
 using Sandbox.Game.World;
 using Sandbox.ModAPI.Ingame;
 using SpaceEngineers.Game.Entities.Blocks;
@@ -18,8 +21,10 @@ using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 using System.Timers;
+using Torch;
 using VRage;
 using VRage.Collections;
+using VRage.Game;
 using VRage.Game.Entity;
 using VRage.Network;
 using VRage.Replication;
@@ -28,8 +33,6 @@ using static Sandbox.Game.Entities.MyCubeGrid;
 
 namespace AdminLogger.AdminLogging
 {
-
-    /*
     public class AntiCheatClass
     {
         private static readonly Logger Log = LogManager.GetLogger("AdminLogger");
@@ -59,24 +62,16 @@ namespace AdminLogger.AdminLogging
 
         public static void ApplyPatching()
         {
-            if (!Main.Config.EnableAntiCheat)
+            if (!Main.Config.AntCheat)
                 return;
 
 
-            frequencyTimer.Elapsed += FrequencyTimer_Elapsed;
-            frequencyTimer.Start();
-
-
-            Patcher.PrePatch<MyCubeGrid>("BuildBlocksRequest", BindingFlags.Instance | BindingFlags.NonPublic, nameof(BuildBlocksRequest));
             Patcher.PrePatch<MyCubeGrid>("OnStockpileFillRequest", BindingFlags.Instance | BindingFlags.NonPublic, nameof(OnStockpileFillRequest));
-            Patcher.PrePatch<MyInventory>("PickupItem_Implementation", BindingFlags.Instance | BindingFlags.NonPublic, nameof(PickupItem_Implementation));
-            Patcher.PrePatch<MyCubeGrid>("RazeBlocksRequest", BindingFlags.Instance | BindingFlags.Public, nameof(RazeBlocksRequest));
 
             //Patcher.PrePatch<MyGridJumpDriveSystem>("PerformJump", BindingFlags.Instance | BindingFlags.NonPublic, nameof(BeforeJump));
 
             Patcher.PrePatch<MyTimerBlock>("Start", BindingFlags.Instance | BindingFlags.Public, nameof(Start));
             Patcher.PrePatch<MyTimerBlock>("Trigger", BindingFlags.Instance | BindingFlags.NonPublic, nameof(Trigger));
-
 
             // Jump Drive Tracking fix 
             m_clientStates = typeof(MyReplicationServer).GetField("m_clientStates", BindingFlags.Instance | BindingFlags.NonPublic);
@@ -93,76 +88,6 @@ namespace AdminLogger.AdminLogging
 
         }
 
-        private static void FrequencyTimer_Elapsed(object sender, ElapsedEventArgs e)
-        {
-            //Check stockpile
-            var kvpStock = stockPileFill.ToList();
-            var kvpBuild = buildBlockRequest.ToList();
-
-         
-            foreach(var vp in kvpStock)
-            {
-                if(vp.Value > 8)
-                {
-                    Log.Warn($"Player {vp.Key} filled {vp.Value} blocks with items in less than a second! Could this be cheating?");
-                }else if (vp.Value > 100)
-                {
-                    banClient(vp.Key, $"Player filled too many blocks with possible known exploit! {vp.Value} blocks filled!");
-                }
-            }
-
-
-
-            foreach (var vp in kvpBuild)
-            {
-                if (vp.Value > 8)
-                {
-                    Log.Warn($"Player {vp.Key} built {vp.Value} blocks with items in less than a second! Could this be cheating?");
-                }
-                else if (vp.Value > 100)
-                {
-                    banClient(vp.Key, $"Player built too many blocks with possible known exploit! {vp.Value} blocks build!");
-                }
-            }
-
-            buildBlockRequest.Clear();
-            stockPileFill.Clear();
-
-        }
-
-        //Calls when you are trying to build blocks
-        private static bool BuildBlocksRequest(MyBlockVisuals visuals, HashSet<MyBlockLocation> locations, long builderEntityId, bool instantBuild, long ownerId)
-        {
-            if (MyEventContext.Current.IsLocallyInvoked)
-                return true;
-
-
-            ulong EventOwner = MyEventContext.Current.Sender.Value;
-            bool hasCreative = MySession.Static.HasPlayerCreativeRights(EventOwner);
-            if (!MySession.Static.CreativeMode && locations.Count > 1 && !hasCreative)
-            {
-                banClient(EventOwner, "was denied buildblocks request! Attempting to build {locations.Count} blocks and they are not admin! How is this possible!? Cheats?");
-                return false;
-            }
-
-            if (!hasCreative)
-            {
-
-                if (buildBlockRequest.ContainsKey(EventOwner))
-                {
-                    buildBlockRequest[EventOwner] += locations.Count;
-                }
-                else
-                {
-                    buildBlockRequest.Add(EventOwner, locations.Count);
-                }
-
-                Log.Error($"{EventOwner} was building {locations.Count} blocks!");
-            }
-
-
-            return true;
-        }
 
 
         //Calls every time you fill a block from your inventory
@@ -186,38 +111,6 @@ namespace AdminLogger.AdminLogging
             return true;
         }
 
-
-        //Calls every time you fill a block from your inventory
-        private static bool PickupItem_Implementation(MyInventory __instance, long entityId, MyFixedPoint amount)
-        {
-            if (MyEventContext.Current.IsLocallyInvoked)
-                return true;
-
-            ulong EventOwner = MyEventContext.Current.Sender.Value;
-
-
-            MyFloatingObject entity;
-            if (!MyEntities.TryGetEntityById(entityId, out entity, false) || entity == null || entity.MarkedForClose || entity.WasRemovedFromWorld)
-            {
-                return false;
-            }
-
-            MyCharacter InvOwner = __instance.Owner as MyCharacter;
-            if (InvOwner == null)
-                return false;
-
-
-            float ss = MySession.Static.SessionSimSpeedServer;
-            double Distance = Vector3D.Distance(entity.PositionComp.GetPosition(), InvOwner.PositionComp.GetPosition());
-            if (Distance > (15*ss))
-            {
-                Log.Info($"{EventOwner} tried to pick up an item that was {Distance}m away! Was there Lag? Server SS: {ss}. Blocking access!");
-                //banClient(EventOwner, $" tried to pick up an item that was {Distance}m away! Was there Lag? Blocking and banning!");
-                return false;
-            }
-
-            return true;
-        }
 
         //Called to remove blocks (Creative request)
         private static bool RazeBlocksRequest(List<Vector3I> locations, long builderEntityId = 0L, ulong user = 0uL)
@@ -342,6 +235,152 @@ namespace AdminLogger.AdminLogging
         }
 
 
+        /// <summary>
+        /// Adds a entry into the built in keen cheater menu.
+        /// </summary>
+        /// <param name="steamid">Steamid of detected player.</param>
+        /// <param name="explanation">Description of suspicious activity detected.</param>
+        private static void AddCheater(ulong steamid, string explanation)
+        {
+            LinkedList<ValidationFailedRecord> lastValidationErrors = (LinkedList<ValidationFailedRecord>)typeof(MyMultiplayerServerBase).GetField("LastValidationErrors", BindingFlags.Static | BindingFlags.NonPublic).GetValue(MyMultiplayerServerBase.Instance);
+
+            ValidationFailedRecord validationError = new ValidationFailedRecord((uint)lastValidationErrors.Count, steamid, DateTime.Now, explanation);
+            lastValidationErrors.AddLast(validationError);
+        }
+
+        /// <summary>
+        /// Fix for the character death bag entity dupe.
+        /// </summary>
+        [HarmonyPatch(typeof(MyInventorySpawnComponent), "SpawnBackpack")]
+        class SpawnBackpackPatch
+        {
+            static void Postfix(MyInventorySpawnComponent __instance, MyEntity obj)
+            {
+                __instance.Character.GetInventory().Clear(true);
+            }
+        }
+
+        /// <summary>
+        /// Fixes for a few jump drive hacks.
+        /// </summary>
+        [HarmonyPatch(typeof(MyGridJumpDriveSystem), "OnRequestJumpFromClient")]
+        class JumpPatch
+        {
+            static bool Prefix(Vector3D jumpTarget, long userId, float jumpDriveDelay)
+            {
+                if (!Main.Config.AntCheat)
+                    return true;
+
+                var gravity = MyGravityProviderSystem.CalculateNaturalGravityInPoint(jumpTarget);
+                var player = MySession.Static.Players.TryGetPlayerBySteamId(MyEventContext.Current.Sender.Value);
+
+                if (gravity != Vector3.Zero)
+                {
+                    banClient(player.Id.SteamId, $"{player.DisplayName}:{MyEventContext.Current.Sender.Value} Tried to jump into gravity.");
+                    AddCheater(MyEventContext.Current.Sender.Value, "Tried to jump into gravity.");
+                    return false;
+                }
+                if (MyGravityProviderSystem.CalculateNaturalGravityInPoint(player.GetPosition()) != Vector3.Zero)
+                {
+                    banClient(player.Id.SteamId, $"{player.DisplayName}:{MyEventContext.Current.Sender.Value} Tried to jump out of gravity.");
+                    AddCheater(MyEventContext.Current.Sender.Value,"Tried to jump out of gravity.");
+                    return false;
+                }
+                if (jumpDriveDelay != 10f)
+                {
+                    banClient(player.Id.SteamId, $"{player.DisplayName}:{MyEventContext.Current.Sender.Value} Tried to jump with a non default delay of {jumpDriveDelay}.");
+                    AddCheater(MyEventContext.Current.Sender.Value, "Non default jump delay.");
+                    return false;
+                }
+                return true;
+            }
+        }
+
+        /// <summary>
+        /// Fixes the DropItem and RemoveItemsAt duplication exploits.
+        /// </summary>
+        [HarmonyPatch(typeof(MyInventory), "RemoveItems")]
+        class RemoveItemsPatch
+        {
+            static bool Prefix(MyInventory __instance, uint itemId, MyFixedPoint? amount = null, bool sendEvent = true, bool spawn = false, MatrixD? spawnPos = null, Action<MyDefinitionId, MyEntity> itemSpawned = null)
+            {
+                if (!Main.Config.AntCheat)
+                    return true;
+
+                var item = __instance.GetItemByID(itemId);
+                var player = MySession.Static.Players.TryGetPlayerBySteamId(MyEventContext.Current.Sender.Value);
+
+                if (item == null | amount == 0)
+                    return true;
+
+                if (spawn == true && item.Value.Amount < amount)
+                {
+                    var itemAmount = amount - item.Value.Amount;
+                    AddCheater(MyEventContext.Current.Sender.Value, "Tried to duplicate items.");
+                    banClient(player.Id.SteamId, $"{player.DisplayName}:{MyEventContext.Current.Sender.Value} Tried to duplicate {itemAmount} {item.Value.Content.SubtypeName}.");
+                    return false;
+                }
+                return true;
+            }
+        }
+
+
+        /// <summary>
+        /// Fix for Tada's bullshit.
+        /// </summary>
+        [HarmonyPatch(typeof(MyCubeGrid), "BuildBlockRequestInternal")]
+        class BuildBlockRequestPatch
+        {
+            static bool Prefix(MyCubeGrid.MyBlockVisuals visuals, MyCubeGrid.MyBlockLocation location, MyObjectBuilder_CubeBlock blockObjectBuilder, long builderEntityId, bool instantBuild, long ownerId, ulong sender, bool isProjection = false)
+            {
+                if (!Main.Config.AntCheat)
+                    return true;
+
+                if (!isProjection)
+                {
+                    blockObjectBuilder.SetupForProjector();
+                    var builder = blockObjectBuilder as MyObjectBuilder_TerminalBlock;
+                    var player = MySession.Static.Players.TryGetPlayerBySteamId(MyEventContext.Current.Sender.Value);
+
+                    if (builder.BuiltBy != player.Identity.IdentityId)
+                    {
+                        banClient(player.Id.SteamId, $"{player.DisplayName}:{MyEventContext.Current.Sender.Value} Tried to build block(s) without their own authership.(Potential dupe)");
+                        AddCheater(MyEventContext.Current.Sender.Value, "Built block(s) without their own authership.");
+                        return false;
+                    }
+                    banClient(player.Id.SteamId, $"{player.DisplayName}:{MyEventContext.Current.Sender.Value} Tried to spawn in block via non accessible means (Potential dupe)");
+                    return false;
+                }
+                return true;
+            }
+        }
+
+
+        [HarmonyPatch(typeof(MyGuiScreenSafeZoneFilter), "EntityListRequest")]
+        class EntityListRequestPatch
+        {
+            public static bool enabled = true;
+
+            static bool Prefix(MyEntityList.MyEntityTypeEnum selectedType)
+            {
+                if (!enabled || !Main.Config.AntCheat)
+                    return true;
+
+                var entityListResponse = typeof(MyGuiScreenSafeZoneFilter).GetMethod("EntityListResponse", BindingFlags.NonPublic | BindingFlags.Static);
+                var steamId = MyEventContext.Current.Sender.Value;
+                MyPlayer player = null;
+                MySession.Static.Players.TryGetPlayerBySteamId(steamId, out player);
+
+                List<MyEntityList.MyEntityListShortInfoItem> list = new List<MyEntityList.MyEntityListShortInfoItem>();
+                list.Add(new MyEntityList.MyEntityListShortInfoItem($"Sorry {player.DisplayName},", long.MaxValue));
+                list.Add(new MyEntityList.MyEntityListShortInfoItem("Pools Closed.", long.MinValue));
+
+                Events.RaiseStaticEvent(entityListResponse, list, MyEventContext.Current.Sender, null);
+                return false;
+            }
+        }
+
+
 
 
 
@@ -375,6 +414,7 @@ namespace AdminLogger.AdminLogging
 
         private static void banClient(ulong id, string reason)
         {
+
             if (MyMultiplayer.Static.BannedClients.Contains(id))
                 return;
 
@@ -394,7 +434,7 @@ namespace AdminLogger.AdminLogging
 
     }
 
-    */
+    
 
 
 

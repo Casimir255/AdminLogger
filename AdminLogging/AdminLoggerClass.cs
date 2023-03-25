@@ -323,7 +323,7 @@ namespace AdminLogger.AdminLogging
 
         [HarmonyPrefix]
         [HarmonyPatch(typeof(MyCubeGrid), "OnGridClosedRequest")]
-        private static void GridClose(long entityId)
+        private static void GridClose(MyCubeGrid __instance)
         {
             ulong PlayerID = MyEventContext.Current.Sender.Value;
             if (PlayerID == 0)
@@ -347,12 +347,8 @@ namespace AdminLogger.AdminLogging
             }
 
             string PlayerName = Player.DisplayName;
-            string GridNamne = "";
-            if (MyEntities.TryGetEntityById(entityId, out MyEntity entity))
-            {
-                GridNamne = entity.DisplayName;
+            string GridNamne = __instance.DisplayName;
 
-            }
 
             Log.Warn(string.Format("{0} removed grid {1}", PlayerName, GridNamne));
 

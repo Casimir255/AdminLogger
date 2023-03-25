@@ -1,0 +1,35 @@
+﻿<UserControl x:Class="AdminLogger.UI.UserControlInterface"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:AdminLogger.UI"
+             mc:Ignorable="d" 
+             d:DesignHeight="550" d:DesignWidth="550">
+    <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="200"/>
+            <ColumnDefinition Width="Auto"/>
+            <ColumnDefinition Width="*"/>
+        </Grid.ColumnDefinitions>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+
+        <DockPanel Grid.Column="0" Grid.ColumnSpan="3" Grid.Row ="0">
+            <TextBlock DockPanel.Dock="Left" VerticalAlignment="Center" Text="Adming Logger" FontWeight="Bold" FontSize="16" Margin="3"/>
+            <TextBlock DockPanel.Dock="Right" VerticalAlignment="Center" HorizontalAlignment="Right" Text="Author: Casimir &amp; Busy" FontSize="16" Margin="3"/>
+        </DockPanel>
+
+        <TextBlock Grid.Column="0" Grid.Row ="1" Text="Put messages into own Log file:" Margin="3" Grid.ColumnSpan="2"/>
+        <CheckBox Grid.Row="1" Grid.Column="1" VerticalAlignment="Center" IsChecked="{Binding PluginEnabled}"/>
+
+        
+         
+
+    </Grid>
+</UserControl>
