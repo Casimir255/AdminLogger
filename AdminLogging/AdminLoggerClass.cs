@@ -68,8 +68,19 @@ namespace AdminLogger.AdminLogging
         {
             if (buildAsAdmin == true)
             {
-                string Builder = builder.DisplayName;
-                string block = ob.SubtypeName;
+                // Handle null builder entity (can happen with projectors)
+                string Builder = "Unknown";
+                if (builder != null && builder.DisplayName != null)
+                {
+                    Builder = builder.DisplayName;
+                }
+
+                // Handle null object builder or SubtypeName
+                string block = "Unknown";
+                if (ob != null && ob.SubtypeName != null)
+                {
+                    block = ob.SubtypeName;
+                }
 
                 Log.Warn(string.Format("{0} placed {1} in creative mode!", Builder, block));
             }
