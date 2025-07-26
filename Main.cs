@@ -95,13 +95,7 @@ namespace AdminLogger
             };
 
 
- 
-
-
-
             var fullRule = new LoggingRule("AdminLogger", LogLevel.Debug, logTarget) { Final = true };
-
-
 
             LogManager.Configuration.LoggingRules.Insert(0, fullRule);
             LogManager.Configuration.Reload();
