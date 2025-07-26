@@ -35,76 +35,6 @@
     <LangVersion>8.0</LangVersion>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="NLog">
-      <HintPath>..\..\..\Desktop\TorchServers\torch-server1\DedicatedServer64\NLog.dll</HintPath>
-      <Private>False</Private>
-    </Reference>
-    <Reference Include="PresentationCore" />
-    <Reference Include="PresentationFramework" />
-    <Reference Include="Sandbox.Common">
-      <HintPath>..\..\..\Desktop\TorchServers\torch-server1\DedicatedServer64\Sandbox.Common.dll</HintPath>
-      <Private>False</Private>
-    </Reference>
-    <Reference Include="Sandbox.Game">
-      <HintPath>..\..\..\Desktop\TorchServers\torch-server1\DedicatedServer64\Sandbox.Game.dll</HintPath>
-      <Private>False</Private>
-    </Reference>
-    <Reference Include="SpaceEngineers.Game">
-      <HintPath>..\..\..\Desktop\TorchServers\torch-server1\DedicatedServer64\SpaceEngineers.Game.dll</HintPath>
-      <Private>False</Private>
-    </Reference>
-    <Reference Include="SpaceEngineers.ObjectBuilders.XmlSerializers">
-      <HintPath>..\..\..\Desktop\TorchServers\torch-server1\DedicatedServer64\SpaceEngineers.ObjectBuilders.XmlSerializers.dll</HintPath>
-      <Private>False</Private>
-    </Reference>
-    <Reference Include="Steamworks.NET">
-      <HintPath>..\..\..\Desktop\TorchServers\torch-server1\DedicatedServer64\Steamworks.NET.dll</HintPath>
-      <Private>False</Private>
-    </Reference>
-    <Reference Include="System" />
-    <Reference Include="System.Core" />
-    <Reference Include="System.Xaml" />
-    <Reference Include="System.Xml.Linq" />
-    <Reference Include="System.Data.DataSetExtensions" />
-    <Reference Include="Microsoft.CSharp" />
-    <Reference Include="System.Data" />
-    <Reference Include="System.Net.Http" />
-    <Reference Include="System.Xml" />
-    <Reference Include="Torch">
-      <HintPath>..\..\..\Desktop\TorchServers\torch-server1\Torch.dll</HintPath>
-      <Private>False</Private>
-    </Reference>
-    <Reference Include="Torch.API">
-      <HintPath>..\..\..\Desktop\TorchServers\torch-server1\Torch.API.dll</HintPath>
-      <Private>False</Private>
-    </Reference>
-    <Reference Include="Torch.Server">
-      <HintPath>..\..\..\Desktop\TorchServers\torch-server1\Torch.Server.exe</HintPath>
-      <Private>False</Private>
-    </Reference>
-    <Reference Include="VRage">
-      <HintPath>..\..\..\Desktop\TorchServers\torch-server1\DedicatedServer64\VRage.dll</HintPath>
-      <Private>False</Private>
-    </Reference>
-    <Reference Include="VRage.Game">
-      <HintPath>..\..\..\Desktop\TorchServers\torch-server1\DedicatedServer64\VRage.Game.dll</HintPath>
-      <Private>False</Private>
-    </Reference>
-    <Reference Include="VRage.Library">
-      <HintPath>..\..\..\Desktop\TorchServers\torch-server1\DedicatedServer64\VRage.Library.dll</HintPath>
-      <Private>False</Private>
-    </Reference>
-    <Reference Include="VRage.Math">
-      <HintPath>..\..\..\Desktop\TorchServers\torch-server1\DedicatedServer64\VRage.Math.dll</HintPath>
-      <Private>False</Private>
-    </Reference>
-    <Reference Include="VRage.Steam">
-      <HintPath>..\..\..\Desktop\TorchServers\torch-server1\DedicatedServer64\VRage.Steam.dll</HintPath>
-      <Private>False</Private>
-    </Reference>
-    <Reference Include="WindowsBase" />
-  </ItemGroup>
-  <ItemGroup>
     <Compile Include="AdminLogging\AdminLoggerClass.cs" />
     <Compile Include="AntiCheat\AntiCheatClass.cs" />
     <Compile Include="AntiCheat\JoinValidation.cs" />
@@ -133,6 +63,73 @@
     <Content Include="manifest.xml">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
+  </ItemGroup>
+  <ItemGroup>
+    <Reference Include="NLog">
+      <HintPath>TorchBinaries\NLog.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="PresentationCore" />
+    <Reference Include="PresentationFramework" />
+    <Reference Include="Sandbox.Common">
+      <HintPath>TorchBinaries\DedicatedServer64\Sandbox.Common.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Sandbox.Game">
+      <HintPath>TorchBinaries\DedicatedServer64\Sandbox.Game.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="SpaceEngineers.Game">
+      <HintPath>TorchBinaries\DedicatedServer64\SpaceEngineers.Game.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="SpaceEngineers.ObjectBuilders">
+      <HintPath>TorchBinaries\DedicatedServer64\SpaceEngineers.ObjectBuilders.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Steamworks.NET">
+      <HintPath>TorchBinaries\DedicatedServer64\Steamworks.NET.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="System" />
+    <Reference Include="System.Xaml" />
+    <Reference Include="Torch">
+      <HintPath>TorchBinaries\Torch.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Torch.API">
+      <HintPath>TorchBinaries\Torch.API.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Torch.Server">
+      <HintPath>TorchBinaries\Torch.Server.exe</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="VRage">
+      <HintPath>TorchBinaries\DedicatedServer64\VRage.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="VRage.Game">
+      <HintPath>TorchBinaries\DedicatedServer64\VRage.Game.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="VRage.Library">
+      <HintPath>TorchBinaries\DedicatedServer64\VRage.Library.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="VRage.Math">
+      <HintPath>TorchBinaries\DedicatedServer64\VRage.Math.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="VRage.Mod.Io">
+      <HintPath>TorchBinaries\DedicatedServer64\VRage.Mod.Io.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="VRage.Network">
+      <HintPath>TorchBinaries\DedicatedServer64\VRage.Network.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="WindowsBase" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
