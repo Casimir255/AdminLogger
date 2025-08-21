@@ -27,6 +27,7 @@ namespace AdminLogger.AdminLogging
     public static class AdminLoggerClass
     {
         private static readonly Logger Log = LogManager.GetLogger("AdminLogger");
+        private static MethodInfo OnAdminSettingsChangedClient;
 
 
 
@@ -53,6 +54,8 @@ namespace AdminLogger.AdminLogging
                 throw new InvalidOperationException("Couldn't find OnTeleport");
             }
 
+
+            OnAdminSettingsChangedClient = AccessTools.Method(typeof(MyGuiScreenAdminMenu), "AdminSettingsChangedClient", new Type[] { typeof(AdminSettingsEnum) });
             ctx.Patch(OnTeleport, postfix: new HarmonyMethod(Method(nameof(TeleportRequest))));
         }
 
@@ -91,14 +94,14 @@ namespace AdminLogger.AdminLogging
 
         [HarmonyPrefix]
         [HarmonyPatch(typeof(MyGuiScreenAdminMenu), "AdminSettingsChanged")]
-        private static void AdminModeChanged(AdminSettingsEnum settings)
+        private static bool AdminModeChanged(AdminSettingsEnum settings)
         {
 
             ulong steamId = MyEventContext.Current.Sender.Value;
             if (MySession.Static.OnlineMode != 0 && (((settings & AdminSettingsEnum.AdminOnly) > AdminSettingsEnum.None && !MySession.Static.IsUserAdmin(steamId)) || !MySession.Static.IsUserModerator(steamId)))
             {
                 Log.Warn($"Player {steamId} tried to change their admins settings but they arent an admin or mod. Are they cheating?");
-                return;
+                return false;
             }
 
 
@@ -121,7 +124,7 @@ namespace AdminLogger.AdminLogging
             //Sanity Vibe Checks
             if (Player == null || Player.DisplayName == null)
             {
-                return;
+                return false;
             }
 
 
@@ -213,6 +216,11 @@ namespace AdminLogger.AdminLogging
                     Log.Warn(string.Format("{0} enabled CanUseAllTerminals", PlayerName));
                 }
             }
+
+            MySession.Static.RemoteAdminSettings[steamId] = settings;
+            Events.RaiseStaticEvent<AdminSettingsEnum>(OnAdminSettingsChangedClient, settings, new EndpointId(steamId));
+
+            return false; // We don't want the original method to run, as we are handling the logging ourselves.
 
         }
 
