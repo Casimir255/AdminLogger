@@ -55,7 +55,7 @@ namespace AdminLogger.AdminLogging
             }
 
 
-            OnAdminSettingsChangedClient = AccessTools.Method(typeof(MyGuiScreenAdminMenu), "AdminSettingsChangedClient", new Type[] { typeof(AdminSettingsEnum) });
+            OnAdminSettingsChangedClient = AccessTools.Method(typeof(MyGuiScreenAdminMenu), "AdminSettingsChangedClient", new Type[] { typeof(AdminSettingsEnum), typeof(ulong) });
             ctx.Patch(OnTeleport, postfix: new HarmonyMethod(Method(nameof(TeleportRequest))));
         }
 
@@ -218,7 +218,7 @@ namespace AdminLogger.AdminLogging
             }
 
             MySession.Static.RemoteAdminSettings[steamId] = settings;
-            Events.RaiseStaticEvent<AdminSettingsEnum>(OnAdminSettingsChangedClient, settings, new EndpointId(steamId));
+            //Events.RaiseStaticEvent<AdminSettingsEnum>(OnAdminSettingsChangedClient, settings, new EndpointId(steamId));
 
             return false; // We don't want the original method to run, as we are handling the logging ourselves.
 
