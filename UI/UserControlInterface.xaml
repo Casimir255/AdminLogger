@@ -28,7 +28,7 @@
         <TextBlock Grid.Column="0" Grid.Row ="1" Text="Put messages into own Log file:" Margin="3" Grid.ColumnSpan="2"/>
         <CheckBox Grid.Row="1" Grid.Column="1" VerticalAlignment="Center" IsChecked="{Binding AdminLoggerOwnLog}"/>
 
-        <TextBlock Grid.Column="0" Grid.Row ="2" Text="AntCheat:" Margin="3" Grid.ColumnSpan="2"/>
+        <TextBlock Grid.Column="0" Grid.Row ="2" Text="AntiCheat:" Margin="3" Grid.ColumnSpan="2"/>
         <CheckBox Grid.Row="2" Grid.Column="1" VerticalAlignment="Center" IsChecked="{Binding AntCheat}"/>
 
         <TextBlock Grid.Column="0" Grid.Row ="3" Text="JoinValidation:" Margin="3" Grid.ColumnSpan="2"/>

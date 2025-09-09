@@ -70,8 +70,6 @@ namespace AdminLogger.AdminLogging
 
             //Patcher.PrePatch<MyGridJumpDriveSystem>("PerformJump", BindingFlags.Instance | BindingFlags.NonPublic, nameof(BeforeJump));
 
-            Patcher.PrePatch<MyTimerBlock>("Start", BindingFlags.Instance | BindingFlags.Public, nameof(Start));
-            Patcher.PrePatch<MyTimerBlock>("Trigger", BindingFlags.Instance | BindingFlags.NonPublic, nameof(Trigger));
 
             // Jump Drive Tracking fix 
             m_clientStates = typeof(MyReplicationServer).GetField("m_clientStates", BindingFlags.Instance | BindingFlags.NonPublic);
@@ -382,35 +380,6 @@ namespace AdminLogger.AdminLogging
 
 
 
-
-
-        // Timer block patch
-        private static bool Start(MyTimerBlock __instance)
-        {
-
-
-            if(__instance.OwnerId == 0)
-            {
-
-                ulong EventOwner = MyEventContext.Current.Sender.Value;
-                Log.Error($"{EventOwner} is trying to trigger a timer owned by nobody! Blocking!");
-                return false;
-            }
-
-
-            return true;
-        }
-
-        private static bool Trigger(MyTimerBlock __instance)
-        {
-            if (__instance.OwnerId == 0)
-            {
-                ulong EventOwner = MyEventContext.Current.Sender.Value;
-                Log.Error($"{EventOwner} is trying to trigger a timer owned by nobody! Blocking!");
-                return false;
-            }
-            return true;
-        }
 
         private static void banClient(ulong id, string reason)
         {
