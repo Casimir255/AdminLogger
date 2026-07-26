@@ -66,7 +66,7 @@ namespace AdminLogger.AdminLogging
                 return;
 
 
-            Patcher.PrePatch<MyCubeGrid>("OnStockpileFillRequest", BindingFlags.Instance | BindingFlags.NonPublic, nameof(OnStockpileFillRequest));
+            Patcher.PrePatch<MyCubeGrid>("OnStockpileFillRequest", BindingFlags.Instance | BindingFlags.NonPublic, typeof(AntiCheatClass), nameof(OnStockpileFillRequest));
 
             //Patcher.PrePatch<MyGridJumpDriveSystem>("PerformJump", BindingFlags.Instance | BindingFlags.NonPublic, nameof(BeforeJump));
 
