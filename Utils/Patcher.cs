@@ -50,7 +50,12 @@ namespace AdminLogger.Utils
             return Patch(true, typeof(T), TargetMethodName, Flags, ReplaceMentMethodName, Types);
         }
 
-        private static MethodInfo Patch(bool PreFix, Type TargetClass, string TargetMethodName, BindingFlags Flags, string ReplaceMentMethodName, Type[] Types)
+        public static MethodInfo PrePatch<T>(string TargetMethodName, BindingFlags Flags, Type ReplaceMentClass, string ReplaceMentMethodName)
+        {
+            return Patch(true, typeof(T), TargetMethodName, Flags, ReplaceMentMethodName, null, ReplaceMentClass);
+        }
+
+        private static MethodInfo Patch(bool PreFix, Type TargetClass, string TargetMethodName, BindingFlags Flags, string ReplaceMentMethodName, Type[] Types, Type ReplaceMentClass = null)
         {
             try
             {
@@ -76,16 +81,24 @@ namespace AdminLogger.Utils
 
 
 
-                Type CallingClassType = new StackFrame(2, false).GetMethod().DeclaringType;
+                //StackFrame caller detection breaks when the wrapper gets inlined; prefer the explicit ReplaceMentClass.
+                Type CallingClassType = ReplaceMentClass ?? new StackFrame(2, false).GetMethod().DeclaringType;
 
                 //Log.Warn("Debug CallingClass Type: " + CallingClassType.Name+"   Elapsed: "+ Watch.ElapsedMilliseconds);
 
                 if (CallingClassType == null)
                 {
                     Log.Error("Unable to find calling class!");
+                    return null;
                 }
 
                 MethodInfo PatchedMethod = CallingClassType.GetMethod(ReplaceMentMethodName, BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance);
+
+                if (PatchedMethod == null)
+                {
+                    Log.Error("Unable to find replacement method " + CallingClassType.Name + "." + ReplaceMentMethodName);
+                    return null;
+                }
 
                 if (PreFix)
                 {
